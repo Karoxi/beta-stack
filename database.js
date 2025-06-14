@@ -2,33 +2,45 @@ import { openDatabaseAsync } from 'expo-sqlite';
 
 let db = null;
 
+// (async () => {
+//   try {
+//     db = await openDatabaseAsync('betastack.db');
+
+//     await db.execAsync('DROP TABLE IF EXISTS cards;');
+//     console.log('✅ Table dropped');
+    
+//   } catch (error) {
+//     console.error('❌ Failed to drop table:', error);
+//   }
+// })();
+
 export const initDB = async () => {
   try {
     db = await openDatabaseAsync('betastack.db');
-    await db.execAsync(`
-      CREATE TABLE IF NOT EXISTS cards (
-        id INTEGER PRIMARY KEY NOT NULL,
-        title TEXT NOT NULL,
-        notes TEXT,
-        imageUri TEXT,
-        createdAt TEXT
-      );
-    `);
+await db.execAsync(`
+  CREATE TABLE IF NOT EXISTS cards (
+    id INTEGER PRIMARY KEY NOT NULL,
+    title TEXT NOT NULL,
+    notes TEXT,
+    imageUri TEXT,              -- Hauptbild
+    extraMediaUris TEXT,        -- JSON-Array weiterer URIs
+    createdAt TEXT
+  );
+`);
+
     console.log('📦 Database initialized');
   } catch (err) {
     console.error('❌ Failed to initialize database:', err);
   }
 };
 
-export const insertCard = async (title, notes, imageUri) => {
-  if (!db) {
-    throw new Error('Database not initialized');
-  }
+export const insertCard = async (title, notes, imageUri, extraMediaUris = []) => {
+  if (!db) throw new Error('Database not initialized');
   const createdAt = new Date().toISOString();
   try {
     const result = await db.runAsync(
-      'INSERT INTO cards (title, notes, imageUri, createdAt) VALUES (?, ?, ?, ?);',
-      [title, notes, imageUri, createdAt]
+      'INSERT INTO cards (title, notes, imageUri, extraMediaUris, createdAt) VALUES (?, ?, ?, ?, ?);',
+      [title, notes, imageUri, JSON.stringify(extraMediaUris), createdAt]
     );
     return result;
   } catch (err) {
@@ -36,6 +48,7 @@ export const insertCard = async (title, notes, imageUri) => {
     throw err;
   }
 };
+
 
 export const fetchCards = async () => {
   if (!db) {

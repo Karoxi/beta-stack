@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, Button, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { fetchCards } from '../database';
+import ScreenWrapper from '../components/ScreenWrapper';
 
 export default function HomeScreen({ navigation }) {
   const [cards, setCards] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const loadCards = async () => {
+    
     try {
       const data = await fetchCards();
       setCards(data);
@@ -41,7 +43,7 @@ export default function HomeScreen({ navigation }) {
   );
 
   return (
-    <View style={styles.container}>
+    <ScreenWrapper>
       <Button title="Create New Card" onPress={() => navigation.navigate('NewCard')} />
       {loading ? (
         <Text>Loading cards...</Text>
@@ -55,7 +57,7 @@ export default function HomeScreen({ navigation }) {
           contentContainerStyle={{ paddingVertical: 10 }}
         />
       )}
-    </View>
+    </ScreenWrapper>
   );
 }
 

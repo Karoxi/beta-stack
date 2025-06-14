@@ -4,14 +4,15 @@ import * as ImagePicker from 'expo-image-picker';
 import { insertCard } from '../database';
 
 export default function NewCardScreen({ navigation }) {
-  const [image, setImage] = useState(null);
+  const [image, setImage] = useState(null); // Hauptbild
+  const [extraMedia, setExtraMedia] = useState([]); // Weitere Bilder/Videos
   const [title, setTitle] = useState('');
   const [notes, setNotes] = useState('');
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: false, // Zuschneiden entfernt
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: false,
       quality: 0.7,
     });
 
@@ -20,15 +21,26 @@ export default function NewCardScreen({ navigation }) {
     }
   };
 
+  const pickExtraMedia = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsMultipleSelection: true,
+      quality: 0.7,
+    });
+
+    if (!result.canceled) {
+      const newUris = result.assets.map(a => a.uri);
+      setExtraMedia(prev => [...prev, ...newUris]);
+    }
+  };
+
   const handleSave = async () => {
-    if (!title.trim() && !notes.trim() && !image) {
-      Alert.alert('Empty card', 'Please fill in at least one field.');
+    if (!title.trim() && !image) {
+      Alert.alert('Fehler', 'Bitte mindestens einen Titel oder ein Bild auswählen.');
       return;
     }
-
     try {
-      await insertCard(title.trim(), notes.trim(), image);
-      Alert.alert('Saved!', 'Your card has been saved.');
+      await insertCard(title.trim(), notes.trim(), image, extraMedia);
       navigation.goBack();
     } catch (err) {
       console.error('Saving error:', err);
@@ -40,14 +52,10 @@ export default function NewCardScreen({ navigation }) {
     <ScrollView contentContainerStyle={styles.container}>
       <Pressable onPress={pickImage} style={{ marginVertical: 20 }}>
         {image ? (
-          <Image
-            source={{ uri: image }}
-            style={styles.image}
-            resizeMode="contain"
-          />
+          <Image source={{ uri: image }} style={styles.image} resizeMode="contain" />
         ) : (
           <View style={styles.imagePlaceholder}>
-            <Text>Select an image</Text>
+            <Text>Select main image</Text>
           </View>
         )}
       </Pressable>
@@ -66,11 +74,27 @@ export default function NewCardScreen({ navigation }) {
         placeholder="Write your learning notes here"
         value={notes}
         onChangeText={setNotes}
-        multiline={true}
-        numberOfLines={6}
+        multiline
       />
 
-      <Button title="Save Card" onPress={handleSave} />
+      <View style={{ marginTop: 20 }}>
+        <Button title="Add more images or videos" onPress={pickExtraMedia} />
+        {extraMedia.length > 0 && (
+          <ScrollView horizontal style={{ marginTop: 10 }}>
+            {extraMedia.map((uri, index) => (
+              <Image
+                key={index}
+                source={{ uri }}
+                style={styles.thumb}
+              />
+            ))}
+          </ScrollView>
+        )}
+      </View>
+
+      <View style={{ marginTop: 30 }}>
+        <Button title="Save Card" onPress={handleSave} />
+      </View>
     </ScrollView>
   );
 }
@@ -105,6 +129,12 @@ const styles = StyleSheet.create({
   textArea: {
     height: 120,
     textAlignVertical: 'top',
+  },
+  thumb: {
+    width: 100,
+    height: 100,
+    marginRight: 10,
+    borderRadius: 8,
   },
 });
 
