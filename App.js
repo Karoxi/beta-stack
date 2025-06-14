@@ -3,8 +3,7 @@ import { ActivityIndicator, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from './screens/HomeScreen';
-import CreateCardScreen from './screens/CreateCardScreen';
-import EditCardScreen from './screens/EditCardScreen';
+import CardFormScreen from './screens/CardFormScreen';
 import CardDetailsScreen from './screens/CardDetailsScreen';
 import { initDB } from './database';
 
@@ -37,9 +36,8 @@ export default function App() {
     <NavigationContainer>
       <Stack.Navigator initialRouteName="BetaStack">
         <Stack.Screen name="BetaStack" component={HomeScreen} />
-        <Stack.Screen name="NewCard" component={CreateCardScreen} />
         <Stack.Screen name="CardDetails" component={CardDetailsScreen} />
-        <Stack.Screen name="EditCard" component={EditCardScreen} />
+        <Stack.Screen name="CardForm" component={CardFormScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

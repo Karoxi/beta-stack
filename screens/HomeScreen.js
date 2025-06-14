@@ -44,7 +44,7 @@ export default function HomeScreen({ navigation }) {
 
   return (
     <ScreenWrapper>
-      <Button title="Create New Card" onPress={() => navigation.navigate('NewCard')} />
+      <Button title="Create New Card" onPress={() => navigation.navigate('CardForm')} />
       {loading ? (
         <Text>Loading cards...</Text>
       ) : cards.length === 0 ? (

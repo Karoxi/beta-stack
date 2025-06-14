@@ -44,7 +44,7 @@ export default function CardDetailScreen({ route, navigation }) {
         headerRight: () => (
           <Button
             title="Edit"
-            onPress={() => navigation.navigate('EditCard', { cardId: card.id })}
+            onPress={() => navigation.navigate('CardForm', { cardId: card.id })}
           />
         ),
       });
