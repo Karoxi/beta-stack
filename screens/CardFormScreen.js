@@ -56,7 +56,11 @@ export default function CardFormScreen({ navigation, route }) {
                     onPress: async () => {
                       try {
                         await deleteCard(cardId);
-                        navigation.navigate('BetaStack');
+                        navigation.reset({
+                            index: 0,
+                            routes: [{ name: 'BetaStack' }],
+                          });
+
                       } catch {
                         Alert.alert('Error', 'delete failed');
                       }
@@ -99,22 +103,32 @@ export default function CardFormScreen({ navigation, route }) {
 
   const removeMainImage = () => setImage(null);
 
-  const handleSave = async () => {
-    if (!title.trim() && !notes.trim() && !image && extraMedia.length === 0) {
-      Alert.alert('Error', 'Please enter at least a title or main image');
-      return;
+const handleSave = async () => {
+  if (!title.trim() && !notes.trim() && !image && extraMedia.length === 0) {
+    Alert.alert('Error', 'Please enter at least a title or main image');
+    return;
+  }
+
+  try {
+    if (cardId) {
+      await updateCard(cardId, title.trim(), notes.trim(), image, JSON.stringify(extraMedia));
+      // Nach Edit zurück zu Details (replace, damit Back-Pfeil sauber bleibt)
+      navigation.goBack();
+
+    } else {
+      const newId = await insertCard(title.trim(), notes.trim(), image, JSON.stringify(extraMedia));
+      // Nach Create zurück zu Home (BetaStack)
+      navigation.reset({
+  index: 0,
+  routes: [{ name: 'BetaStack' }],
+});
+
     }
-    try {
-      if (cardId) {
-        await updateCard(cardId, title.trim(), notes.trim(), image, JSON.stringify(extraMedia));
-      } else {
-        await insertCard(title.trim(), notes.trim(), image, JSON.stringify(extraMedia));
-      }
-      navigation.navigate('BetaStack');
-    } catch {
-      Alert.alert('Error', 'Card could not be saved');
-    }
-  };
+  } catch {
+    Alert.alert('Error', 'Card could not be saved');
+  }
+};
+
 
   if (loading) {
     return (
@@ -126,7 +140,6 @@ export default function CardFormScreen({ navigation, route }) {
 
   return (
     <View style={styles.container}>
-      {/* Main image */}
       <Pressable onPress={pickMainImage} style={{ marginVertical: 10 }}>
         {image ? (
           <View>
@@ -140,7 +153,6 @@ export default function CardFormScreen({ navigation, route }) {
         )}
       </Pressable>
 
-      {/* more images */}
       <Text style={styles.label}>Additional images</Text>
       <FlatList
         horizontal
@@ -169,7 +181,6 @@ export default function CardFormScreen({ navigation, route }) {
         showsHorizontalScrollIndicator={false}
       />
 
-      {/* Title */}
       <Text style={styles.label}>Titel</Text>
       <TextInput
         style={styles.input}
@@ -178,7 +189,6 @@ export default function CardFormScreen({ navigation, route }) {
         onChangeText={setTitle}
       />
 
-      {/* Notes */}
       <Text style={styles.label}>Notizen</Text>
       <TextInput
         style={[styles.input, styles.textArea]}
@@ -188,7 +198,6 @@ export default function CardFormScreen({ navigation, route }) {
         multiline
       />
 
-      {/* Save btn */}
       <View style={{ marginTop: 30 }}>
         <Button
           title={cardId ? 'Save' : 'Create Projekt'}
@@ -196,7 +205,6 @@ export default function CardFormScreen({ navigation, route }) {
         />
       </View>
 
-      {/* Cancel Button */}
       <View style={{ marginTop: 10 }}>
         <Button
           title="Cancel"

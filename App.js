@@ -24,7 +24,6 @@ export default function App() {
   }, []);
 
   if (!dbInitialized) {
-    // Solange die DB nicht fertig ist, zeig Loader an
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" />
@@ -35,9 +34,21 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="BetaStack">
-        <Stack.Screen name="BetaStack" component={HomeScreen} />
-        <Stack.Screen name="CardDetails" component={CardDetailsScreen} />
-        <Stack.Screen name="CardForm" component={CardFormScreen} />
+        <Stack.Screen
+          name="BetaStack"
+          component={HomeScreen}
+          options={{ title: 'My Projects' }}
+        />
+        <Stack.Screen
+          name="CardDetails"
+          component={CardDetailsScreen}
+          options={{ title: 'Project Details' }}
+        />
+        <Stack.Screen
+          name="CardForm"
+          component={CardFormScreen}
+          options={{ title: 'Project Manager' }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
